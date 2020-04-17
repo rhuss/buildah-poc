@@ -1,6 +1,9 @@
 ## Buildah Pod with an upload init-container
 
 This small PoC show how an init-container can be leveraged for uploading a Docker context which then can be used by `buildah` for creating an image.
+The very simplistic Docker build is contained in the `docker/` directory
+It contains already `RUN` and `ADD` instructions, though.
+This build can be replaced however with anything else, too.
 
 To run it you need a running Kubernetes cluster.
 
@@ -35,3 +38,9 @@ The following steps are performed by `test.sh` (but please have a look yourself)
 * The marked file `/upload/done` is created via `kubectl exec -- touch`
 * The application container in the Pod start and also mount `/upload`
 * The build script then executes `buildah bud` and `buildah push` to create the image and pushes it to Docker Hub. Push-Creds are picked up from a Secret
+
+## Possible Improvements
+
+* Check for that the init-container is up before copying over data. For now its just a `sleep`
+* Use more sophisticated way for authentication against the registry
+* The actual build should be probably a `Job` not a `Pod`, to avoid name clashes and get other benefits (see the "Batch Job" Pattern in https://k8spatterns.io for the benefits using a Job)

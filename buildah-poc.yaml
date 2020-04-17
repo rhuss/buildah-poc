@@ -17,7 +17,7 @@ data:
 
     echo "Pushing to registry"
     # Move creds to a secret and use an env-var here ...
-    buildah push --tls-verify=true --creds=$DOCKER_USER:DOCKER_PASSWORD "index.docker.io/$DOCKER_USER/buildah-test" "docker://index.docker.io/$DOCKER_USER/buildah-test"
+    buildah push --tls-verify=true --creds=$DOCKER_USER:$DOCKER_PASSWORD "index.docker.io/$DOCKER_USER/buildah-test" "docker://index.docker.io/$DOCKER_USER/buildah-test"
 ---
 apiVersion: v1
 kind: Pod
@@ -43,7 +43,7 @@ spec:
     # Execute script mounted from configmap
     command: [ sh, /opt/build.sh ]
     envFrom:
-      secretRef:
+    - secretRef:
         name: docker-creds
     volumeMounts:
     # Mount volume with our builder file
