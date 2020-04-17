@@ -10,14 +10,17 @@ data:
 
     echo "Extracting uploaded file"
     mkdir /tmp/work
-    tar xvf /upload/docker.tar -C /tmp/work
+    cd /tmp/work
+    export HOME=/tmp/work
+
+    tar xvf /upload/docker.tar
 
     echo "Running buildah bud"
-    buildah --storage-driver vfs bud --isolation chroot --format=oci --tls-verify=true --layers -f /tmp/work/Dockerfile -t "index.docker.io/$DOCKER_USER/buildah-test" /tmp/work
+    buildah bud --storage-driver vfs --isolation chroot --format=oci --tls-verify=true --layers -f Dockerfile -t "index.docker.io/$DOCKER_USER/buildah-test" .
 
     echo "Pushing to registry"
     # Move creds to a secret and use an env-var here ...
-    buildah --storage-driver vfs push --tls-verify=true --creds=$DOCKER_USER:$DOCKER_PASSWORD "index.docker.io/$DOCKER_USER/buildah-test" "docker://index.docker.io/$DOCKER_USER/buildah-test"
+    buildah push --storage-driver vfs --tls-verify=true --creds=$DOCKER_USER:$DOCKER_PASSWORD "index.docker.io/$DOCKER_USER/buildah-test" "docker://index.docker.io/$DOCKER_USER/buildah-test"
 
     # Wait forever
     tail -f /dev/null
@@ -45,6 +48,8 @@ spec:
     image: quay.io/buildah/stable:v1.11.0
     # Execute script mounted from configmap
     command: [ sh, /opt/build.sh ]
+#    securityContext:
+#      runAsUser: 2
     envFrom:
     - secretRef:
         name: docker-creds
