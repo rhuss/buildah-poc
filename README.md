@@ -5,9 +5,11 @@ The very simplistic Docker build is contained in the `docker/` directory
 It contains already `RUN` and `ADD` instructions, though.
 This build can be replaced however with anything else, too.
 
+It is important to note, that the build does **not** run with `privileged: true`
+
 To run it you need a running Kubernetes cluster.
 
-Then just call
+Then on Kubernetes just call
 
 ```
 test.sh <docker user> <docker password>
@@ -15,6 +17,12 @@ test.sh <docker user> <docker password>
 
 where `<docker user>` and `<docker password>` are valid credentials of a DockerHub account.
 You need to provide the credentials only once as they are then stored in a secret in the cluster.
+
+On OpenShift, use
+
+```
+test-oc.sh <docker user> <docker password>
+```
 
 Please check the logs after running the script.
 Or, even better, call `stern buildah-poc &` before starting `test.sh`

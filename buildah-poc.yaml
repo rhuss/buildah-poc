@@ -13,11 +13,14 @@ data:
     tar xvf /upload/docker.tar -C /tmp/work
 
     echo "Running buildah bud"
-    buildah bud --format=oci --tls-verify=true --layers -f /tmp/work/Dockerfile -t "index.docker.io/$DOCKER_USER/buildah-test" /tmp/work
+    buildah --storage-driver vfs bud --isolation chroot --format=oci --tls-verify=true --layers -f /tmp/work/Dockerfile -t "index.docker.io/$DOCKER_USER/buildah-test" /tmp/work
 
     echo "Pushing to registry"
     # Move creds to a secret and use an env-var here ...
-    buildah push --tls-verify=true --creds=$DOCKER_USER:$DOCKER_PASSWORD "index.docker.io/$DOCKER_USER/buildah-test" "docker://index.docker.io/$DOCKER_USER/buildah-test"
+    buildah --storage-driver vfs push --tls-verify=true --creds=$DOCKER_USER:$DOCKER_PASSWORD "index.docker.io/$DOCKER_USER/buildah-test" "docker://index.docker.io/$DOCKER_USER/buildah-test"
+
+    # Wait forever
+    tail -f /dev/null
 ---
 apiVersion: v1
 kind: Pod
@@ -57,8 +60,6 @@ spec:
       mountPath: /var/lib/containers
     # Seems to be necessary with buildah, needs to be verified
     # if this works on OpenShift (but should)
-    securityContext:
-      privileged: true
   volumes:
   - name: config
     configMap:
